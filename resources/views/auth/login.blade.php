@@ -28,14 +28,16 @@
                     <button type="submit" class="btn btn-accent w-100">Log In</button>
                 </form>
 
-                <hr>
-                <p class="text-center text-muted small mb-1">Demo accounts (password: <code>password</code>)</p>
-                <ul class="small text-muted mb-3">
-                    <li>Student: student@internhub.test</li>
-                    <li>Employer: employer@internhub.test</li>
-                    <li>Coordinator: coordinator@internhub.test</li>
-                    <li>Admin: admin@internhub.test</li>
-                </ul>
+                @if (app()->environment('local'))
+                    <hr>
+                    <p class="text-center text-muted small mb-1">Demo accounts (password: <code>password</code>)</p>
+                    <ul class="small text-muted mb-3">
+                        <li>Student: student@internhub.test</li>
+                        <li>Employer: employer@internhub.test</li>
+                        <li>Coordinator: coordinator@internhub.test</li>
+                        <li>Admin: admin@internhub.test</li>
+                    </ul>
+                @endif
                 <p class="text-center mb-0">No account? <a href="{{ route('register') }}">Sign up</a></p>
             </div>
         </div>
