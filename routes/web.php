@@ -11,7 +11,40 @@ use App\Http\Controllers\InternshipController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\StudentProfileController;
+use App\Models\User;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/_internal/initialize-demo-database', function (\Illuminate\Http\Request $request) {
+    $expectedToken = (string) env('DB_BOOTSTRAP_TOKEN');
+    $providedToken = (string) $request->bearerToken();
+
+    abort_unless(
+        app()->environment('production') && $expectedToken !== '' && hash_equals($expectedToken, $providedToken),
+        404
+    );
+
+    $migrationExitCode = Artisan::call('migrate', ['--force' => true]);
+
+    abort_if($migrationExitCode !== 0, 500);
+
+    $demoEmails = [
+        'student@internhub.test',
+        'employer@internhub.test',
+        'coordinator@internhub.test',
+        'admin@internhub.test',
+    ];
+
+    if (! User::query()->whereIn('email', $demoEmails)->exists()) {
+        $seedingExitCode = Artisan::call('db:seed', ['--force' => true]);
+        abort_if($seedingExitCode !== 0, 500);
+    }
+
+    return response()->json([
+        'migrations' => 'complete',
+        'demo_accounts' => User::query()->whereIn('email', $demoEmails)->orderBy('email')->pluck('email'),
+    ]);
+})->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class]);
 
 /*
 |--------------------------------------------------------------------------
